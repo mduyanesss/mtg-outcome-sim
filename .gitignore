@@ -5,3 +5,5 @@ __pycache__/
 *.egg-info/
 dist/
 reports_test/
+final_reports/
+/sim_bundle.py

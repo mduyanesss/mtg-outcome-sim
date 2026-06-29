@@ -1,0 +1,182 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+  background: #f5f5f5;
+  color: #1a1a2e;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+header h1 {
+  font-size: 1.8rem;
+  color: #2563eb;
+}
+
+header p {
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.panel {
+  margin-bottom: 1rem;
+}
+
+.panel h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #444;
+}
+
+textarea {
+  width: 100%;
+  font-family: "Cascadia Code", "Fira Code", monospace;
+  font-size: 0.85rem;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+  background: #fff;
+  line-height: 1.4;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: #e5e7eb;
+  color: #333;
+  margin-top: 0.5rem;
+}
+
+button:hover {
+  background: #d1d5db;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#run-btn {
+  background: #2563eb;
+  color: white;
+  font-size: 1.1rem;
+  padding: 0.75rem 2rem;
+}
+
+#run-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.controls {
+  text-align: center;
+  margin: 1.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.controls label {
+  font-weight: 500;
+}
+
+.controls input {
+  padding: 0.5rem;
+  width: 100px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+#results {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-top: 1rem;
+}
+
+#results h2 {
+  margin-bottom: 1rem;
+  color: #2563eb;
+}
+
+#results h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.5rem 0 1.5rem;
+}
+
+th, td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+th {
+  font-weight: 600;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+td {
+  font-size: 0.9rem;
+}
+
+td strong {
+  color: #2563eb;
+}
+
+.hidden {
+  display: none;
+}
+
+#error {
+  color: #dc2626;
+  padding: 1rem;
+  background: #fef2f2;
+  border-radius: 4px;
+  margin-top: 1rem;
+  border: 1px solid #fecaca;
+  font-family: monospace;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+}
+
+#loading {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-style: italic;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 0.5rem;
+  }
+  header h1 {
+    font-size: 1.4rem;
+  }
+  .controls {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

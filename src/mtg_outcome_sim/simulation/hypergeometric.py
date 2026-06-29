@@ -1,10 +1,50 @@
 """Exact hypergeometric probability calculations for MTG draw questions.
 
-Uses scipy.stats.hypergeom for the underlying distribution.
+Uses scipy.stats.hypergeom when available, with a pure-Python math.comb
+fallback for environments where scipy is not installed (e.g. Pyodide/WebAssembly).
 Assumes drawing without replacement from a finite deck.
 """
 
-from scipy.stats import hypergeom
+import math
+
+
+# ---------------------------------------------------------------------------
+# Pure-Python hypergeometric primitives (no scipy required)
+# ---------------------------------------------------------------------------
+
+def _hypergeom_pmf(k: int, N: int, K: int, n: int) -> float:
+    """Hypergeometric PMF: P(X = k). Pure Python using math.comb."""
+    if k < 0 or k > K or k > n or n - k > N - K:
+        return 0.0
+    return (math.comb(K, k) * math.comb(N - K, n - k)) / math.comb(N, n)
+
+
+def _hypergeom_sf(k: int, N: int, K: int, n: int) -> float:
+    """Hypergeometric survival function: P(X > k) = 1 - P(X <= k)."""
+    total = 0.0
+    for i in range(k + 1):
+        total += _hypergeom_pmf(i, N, K, n)
+    return 1.0 - total
+
+
+def _hypergeom_pmf_scalar(k: int, N: int, K: int, n: int) -> float:
+    """Hypergeometric PMF: P(X = k). Pure Python using math.comb.
+
+    (Backward-compatible alias kept for internal use.)
+    """
+    return _hypergeom_pmf(k, N, K, n)
+
+
+# ---------------------------------------------------------------------------
+# Public API – try scipy first, fall back to pure Python
+# ---------------------------------------------------------------------------
+
+_SCIPY_AVAILABLE = False
+try:
+    from scipy.stats import hypergeom  # noqa: F811
+    _SCIPY_AVAILABLE = True
+except ImportError:
+    pass
 
 
 def prob_at_least(
@@ -36,8 +76,11 @@ def prob_at_least(
     if draws > population:
         draws = population
 
-    # P(X >= minimum) = sf(minimum - 1)
-    return float(hypergeom.sf(minimum - 1, population, successes, draws))
+    if _SCIPY_AVAILABLE:
+        # P(X >= minimum) = sf(minimum - 1)
+        return float(hypergeom.sf(minimum - 1, population, successes, draws))
+    else:
+        return _hypergeom_sf(minimum - 1, population, successes, draws)
 
 
 def prob_exact(
@@ -61,7 +104,10 @@ def prob_exact(
     if draws > population:
         draws = population
 
-    return float(hypergeom.pmf(count, population, successes, draws))
+    if _SCIPY_AVAILABLE:
+        return float(hypergeom.pmf(count, population, successes, draws))
+    else:
+        return _hypergeom_pmf(count, population, successes, draws)
 
 
 def opening_hand_distribution(

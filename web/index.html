@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MTG Outcome Sim</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>MTG Outcome Sim</h1>
+    <p>Probabilistic deck outcome calculator for Commander</p>
+  </header>
+
+  <main>
+    <div class="panel">
+      <h2>Decklist</h2>
+      <textarea id="decklist" rows="15" placeholder="1 Chatterfang, Squirrel General&#10;1 Forest&#10;..."></textarea>
+      <button id="load-sample">Load Sample Deck</button>
+    </div>
+
+    <div class="panel">
+      <h2>Outcomes</h2>
+      <textarea id="outcomes" rows="10" placeholder="YAML outcome definitions"></textarea>
+      <button id="load-default-outcomes">Load Default Outcomes</button>
+    </div>
+
+    <div class="controls">
+      <label>Iterations: <input id="iterations" type="number" value="10000" min="1000" max="1000000" step="1000"></label>
+      <button id="run-btn" disabled>Loading Pyodide...</button>
+    </div>
+
+    <div id="results" class="hidden">
+      <h2>Results</h2>
+      <div id="tag-distribution"></div>
+      <div id="outcome-results"></div>
+    </div>
+
+    <div id="loading" class="hidden">
+      <p>Running simulation...</p>
+    </div>
+
+    <div id="error" class="hidden"></div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+deck_format: commander
+commander: "Chatterfang, Squirrel General"
+turn_limit: 6
+iterations: 100000
+
+outcomes:
+  - name: "Hit 3 lands by turn 3"
+    type: "minimum_cards_seen"
+    tag: "lands"
+    minimum: 3
+    by_turn: 3
+
+  - name: "Ramp by turn 2"
+    type: "has_tag"
+    tag: "ramp"
+    minimum: 1
+    by_turn: 2
+
+  - name: "Engine online by turn 6"
+    type: "all_groups_present"
+    by_turn: 6
+    groups:
+      - tag: "token_maker"
+        minimum: 1
+      - tag: "sac_outlet"
+        minimum: 1
+      - tag: "payoff"
+        minimum: 1
