@@ -1,0 +1,68 @@
+tags:
+  - name: lands
+    description: "Cards that produce mana from the land slot"
+    oracle_patterns: []
+    type_line_patterns:
+      - '(?i)land'
+  - name: ramp
+    description: "Cards that accelerate mana beyond one land per turn"
+    oracle_patterns:
+      - '(?i)search your library for a.*land'
+      - '(?i)add \{.*\}'
+      - '(?i)put.*land.*onto the battlefield'
+      - '(?i)add .* mana'
+      - '(?i)untap target.*land'
+    type_line_patterns: []
+  - name: draw
+    description: "Cards that draw additional cards"
+    oracle_patterns:
+      - '(?i)draw.*cards?'
+      - '(?i)draw a card'
+    type_line_patterns: []
+  - name: removal
+    description: "Cards that remove threats from the battlefield"
+    oracle_patterns:
+      - '(?i)destroy target'
+      - '(?i)exile target'
+      - '(?i)deal.*damage to.*target'
+      - '(?i)-\d+/-\d+.*target'
+      - '(?i)fights? target'
+      - '(?i)target.*gets? -\d+'
+    type_line_patterns: []
+  - name: combo_piece
+    description: "Part of a game-winning combo (requires manual tagging)"
+    oracle_patterns: []
+    type_line_patterns: []
+  - name: payoff
+    description: "Cards that reward the deck's primary strategy"
+    oracle_patterns:
+      - '(?i)whenever.*dies'
+      - '(?i)whenever.*enter.*graveyard'
+      - '(?i)whenever.*leaves the battlefield'
+      - '(?i)whenever.*you sacrifice'
+      - '(?i)each opponent loses.*life'
+      - '(?i)whenever.*creature.*dies'
+      - '(?i)drain'
+    type_line_patterns: []
+  - name: sac_outlet
+    description: "Cards that let you sacrifice creatures at will"
+    oracle_patterns:
+      - '(?i)sacrifice a creature'
+      - '(?i)sacrifice another creature'
+      - '(?i)sacrifice.*creature.*:'
+    type_line_patterns: []
+  - name: token_maker
+    description: "Cards that create creature tokens"
+    oracle_patterns:
+      - '(?i)create.*token'
+      - '(?i)create a.*creature token'
+    type_line_patterns: []
+  - name: engine_piece
+    description: "Cards that generate incremental value over time"
+    oracle_patterns:
+      - '(?i)whenever you draw'
+      - '(?i)whenever you cast'
+      - '(?i)at the beginning of.*upkeep'
+      - '(?i)whenever.*enter.*under your control'
+      - '(?i)whenever.*attack'
+    type_line_patterns: []
