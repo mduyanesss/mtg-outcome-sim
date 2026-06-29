@@ -13,6 +13,7 @@ tags:
       - '(?i)add .* mana'
       - '(?i)untap target.*land'
     type_line_patterns: []
+    exclude_if_tags: ["lands"]
   - name: draw
     description: "Cards that draw additional cards"
     oracle_patterns:

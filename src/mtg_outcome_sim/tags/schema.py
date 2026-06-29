@@ -5,6 +5,7 @@ class TagDefinition(BaseModel):
     description: str
     oracle_patterns: list[str] = []
     type_line_patterns: list[str] = []
+    exclude_if_tags: list[str] = []
 
 class CardTags(BaseModel):
     card_name: str

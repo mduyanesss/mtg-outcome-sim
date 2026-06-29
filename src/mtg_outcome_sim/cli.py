@@ -1,18 +1,67 @@
 import typer
+import yaml
 from pathlib import Path
 
 app = typer.Typer(name="mtg-outcome-sim")
 
 
+def _load_tag_overrides(overrides_path: Path | None) -> dict[str, set[str]]:
+    """Load manual tag overrides from a YAML file.
+
+    Expected format:
+        overrides:
+          - card_name: "Pitiless Plunderer"
+            tags: ["combo_piece", "payoff", "ramp"]
+
+    Returns a dict mapping card name -> set of tags.
+    """
+    if overrides_path is None:
+        return {}
+    data = yaml.safe_load(overrides_path.read_text())
+    overrides: dict[str, set[str]] = {}
+    for entry in data.get("overrides", []):
+        overrides[entry["card_name"]] = set(entry["tags"])
+    return overrides
+
+
 @app.command(name="import")
-def import_(deck_path: Path = typer.Argument(..., help="Path to decklist file")):
-    """Import and parse a decklist, showing a summary."""
+def import_(
+    deck_path: Path = typer.Argument(..., help="Path to decklist file"),
+    tag_overrides: Path
+    | None = typer.Option(
+        None, "--tag-overrides", help="YAML file with manual tag overrides"
+    ),
+):
+    """Import and parse a decklist, showing a summary and tag distribution."""
     text = deck_path.read_text()
     from .decklist.parser import parse_decklist
+    from .cards.normalizer import normalize
+    from .tags.classifier import classify_card
 
     deck = parse_decklist(text)
     typer.echo(f"Deck: {len(deck.cards)} unique cards, {deck.total_count} total")
     typer.echo(f"Format: {deck.format}")
+
+    # Load and apply tag overrides
+    overrides = _load_tag_overrides(tag_overrides)
+
+    # Classify tags for each card
+    tag_counts: dict[str, int] = {}
+    for card in deck.cards:
+        cd = normalize(card.name)
+        ct = classify_card(
+            card.name,
+            cd.oracle_text if cd else "",
+            cd.type_line if cd else "",
+            overrides=overrides,
+        )
+        for tag in ct.tags:
+            tag_counts[tag] = tag_counts.get(tag, 0) + card.quantity
+
+    typer.echo("---")
+    typer.echo("Tag Distribution:")
+    for tag, count in sorted(tag_counts.items(), key=lambda x: -x[1]):
+        typer.echo(f"  {tag}: {count}")
     typer.echo("---")
     for card in deck.cards[:10]:
         typer.echo(f"  {card.quantity}x {card.name}")
@@ -50,6 +99,13 @@ def run(
     method: str = typer.Option("monte_carlo", help="Method: hypergeometric or monte_carlo"),
     output_dir: Path = typer.Option(None, help="Output directory for reports"),
     report_format: str = typer.Option("all", help="Report formats: json, markdown, console, all"),
+    tag_overrides: Path
+    | None = typer.Option(
+        None, "--tag-overrides", help="YAML file with manual tag overrides"
+    ),
+    mana_curve: bool = typer.Option(
+        False, "--mana-curve", help="Also compute and display mana curve"
+    ),
 ):
     """Run outcome simulations on a decklist and generate reports."""
     from .decklist.parser import parse_decklist
@@ -58,9 +114,13 @@ def run(
     from .simulation.outcome import load_outcomes
     from .simulation.hypergeometric import prob_at_least
     from .simulation.monte_carlo import run_simulation
-    from .reports.console import print_console_report
+    from .simulation.mana_model import simulate_mana_curve_mc
+    from .reports.console import print_console_report, print_mana_curve_table
     from .reports.json_report import generate_json_report
     from .reports.markdown import generate_markdown_report
+
+    # Load tag overrides
+    overrides = _load_tag_overrides(tag_overrides)
 
     # Load deck
     text = deck_path.read_text()
@@ -78,10 +138,10 @@ def run(
             )
         )
 
-    # Classify tags
+    # Classify tags (with overrides if provided)
     deck_tags_dict: dict[str, set[str]] = {}
     for name, oracle, type_line in card_data:
-        ct = classify_card(name, oracle, type_line)
+        ct = classify_card(name, oracle, type_line, overrides=overrides)
         deck_tags_dict[name] = ct.tags
 
     # Build full population (each card counted once for Commander singleton;
@@ -150,10 +210,29 @@ def run(
 
         results.append(result_entry)
 
+    # Compute mana curve if requested
+    mana_curve_data: list[dict] | None = None
+    if mana_curve:
+        land_count = tag_counts.get("lands", 0)
+        ramp_count = tag_counts.get("ramp", 0)
+        deck_size = len(population_tags)
+        typer.echo(
+            f"Computing mana curve (lands={land_count}, ramp={ramp_count}, "
+            f"deck={deck_size})..."
+        )
+        mana_curve_data = simulate_mana_curve_mc(
+            deck_size=deck_size,
+            land_count=land_count,
+            ramp_count=ramp_count,
+            max_turns=config.turn_limit,
+            iterations=10000,
+            seed=seed,
+        )
+
     # Print console report (always)
     if report_format in ("console", "all"):
         deck_name = deck_path.stem
-        print_console_report(deck_name, tag_counts, results)
+        print_console_report(deck_name, tag_counts, results, mana_curve_data)
 
     # Write file reports if output_dir specified
     if output_dir is not None:
@@ -171,6 +250,7 @@ def run(
                 tag_counts=tag_counts,
                 results=results,
                 output_path=json_path,
+                mana_curve_data=mana_curve_data,
             )
             typer.echo(f"JSON report: {json_path}")
 
@@ -184,6 +264,7 @@ def run(
                 tag_counts=tag_counts,
                 results=results,
                 output_path=md_path,
+                mana_curve_data=mana_curve_data,
             )
             typer.echo(f"Markdown report: {md_path}")
 

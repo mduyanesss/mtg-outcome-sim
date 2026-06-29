@@ -10,6 +10,7 @@ def generate_markdown_report(
     tag_counts: dict[str, int],
     results: list[dict],
     output_path: Path | str,
+    mana_curve_data: list[dict] | None = None,
 ) -> Path:
     """Generate a Markdown report file.
 
@@ -23,6 +24,7 @@ def generate_markdown_report(
             name, type, probability, method, and optionally
             iterations, by_turn.
         output_path: Where to write the Markdown report.
+        mana_curve_data: Optional mana curve data from simulate_mana_curve_mc.
 
     Returns:
         Path to the generated report file.
@@ -65,6 +67,20 @@ def generate_markdown_report(
             lines.append(f"- **By Turn:** {r['by_turn']}")
         if "iterations" in r and r["method"] == "Monte Carlo":
             lines.append(f"- **Iterations:** {r['iterations']:,}")
+        lines.append("")
+
+    if mana_curve_data:
+        lines.extend([
+            "## Mana Curve",
+            "",
+            "| Turn | Mean | Median | P10 | P90 |",
+            "|------|------|--------|-----|-----|",
+        ])
+        for row in mana_curve_data:
+            lines.append(
+                f"| {row['turn']} | {row['mean_mana']:.2f} | "
+                f"{row['median_mana']} | {row['p10_mana']} | {row['p90_mana']} |"
+            )
         lines.append("")
 
     path = Path(output_path)

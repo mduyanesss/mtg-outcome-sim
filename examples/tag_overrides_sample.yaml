@@ -1,0 +1,5 @@
+overrides:
+  - card_name: "Pitiless Plunderer"
+    tags: ["combo_piece", "payoff", "ramp"]
+  - card_name: "Chatterfang, Squirrel General"
+    tags: ["combo_piece", "payoff", "sac_outlet", "token_maker"]

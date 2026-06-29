@@ -11,6 +11,7 @@ def generate_json_report(
     tag_counts: dict[str, int],
     results: list[dict],
     output_path: Path | str,
+    mana_curve_data: list[dict] | None = None,
 ) -> Path:
     """Generate a JSON report file.
 
@@ -24,11 +25,12 @@ def generate_json_report(
             name, type, probability, method, and optionally
             iterations, by_turn.
         output_path: Where to write the JSON report.
+        mana_curve_data: Optional mana curve data from simulate_mana_curve_mc.
 
     Returns:
         Path to the generated report file.
     """
-    report = {
+    report: dict = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "deck": {
             "name": deck_name,
@@ -51,6 +53,19 @@ def generate_json_report(
         if "by_turn" in r:
             outcome_entry["by_turn"] = r["by_turn"]
         report["outcomes"].append(outcome_entry)
+
+    if mana_curve_data:
+        report["mana_curve"] = []
+        for row in mana_curve_data:
+            report["mana_curve"].append(
+                {
+                    "turn": row["turn"],
+                    "mean_mana": round(row["mean_mana"], 2),
+                    "median_mana": row["median_mana"],
+                    "p10_mana": row["p10_mana"],
+                    "p90_mana": row["p90_mana"],
+                }
+            )
 
     path = Path(output_path)
     path.write_text(json.dumps(report, indent=2))
