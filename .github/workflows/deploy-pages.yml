@@ -12,8 +12,8 @@ permissions:
   administration: write
 
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: "pages-deploy"
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:
@@ -31,7 +31,6 @@ jobs:
       
       - name: Enable GitHub Pages
         run: |
-          # Check if Pages is already configured
           PAGES_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
