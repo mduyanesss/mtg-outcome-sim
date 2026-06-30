@@ -7,11 +7,13 @@ on:
 
 permissions:
   contents: read
-  id-token: write
+  pages: write
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
